@@ -2,9 +2,8 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_voyageai import VoyageAIEmbeddings
 from dotenv import load_dotenv
-import aiohttp
 import os
-import ssl
+from langchain_community.vectorstores import FAISS
 
 load_dotenv() # takes variables from .env file
 
@@ -44,4 +43,20 @@ sample_docs = [
 documents_embds = embeddings.embed_documents(sample_docs)
 
 print(documents_embds[0][:5])
+
+# 4. Save embeddings in vector store
+vector_store_folder_path = "faiss_index"
+if  os.path.isdir(vector_store_folder_path):
+
+    print("\n4. Loading existing vector store... ")
+    vectordb = FAISS.load_local(
+        vector_store_folder_path,
+        embeddings,
+        allow_dangerous_deserialization=True
+    )
+
+else:
+    print("\n4. Create new vector store... ")
+    vectordb = FAISS.from_documents(split_documents, embeddings)
+    vectordb.save_local(vector_store_folder_path)
 

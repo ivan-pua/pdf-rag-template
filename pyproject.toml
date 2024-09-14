@@ -11,8 +11,7 @@ langchain-community = "^0.2.0"
 langchain-voyageai = "^0.1.1"
 pypdf = "^4.3.1"
 python-dotenv = "^1.0.1"
-certifi = "^2024.8.30"
-pip-system-certs = "^4.0"
+faiss-cpu = "^1.8.0.post1"
 
 [build-system]
 requires = ["poetry-core"]
