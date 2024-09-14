@@ -7,9 +7,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-langchain-community = "^0.3.0"
+langchain-community = "^0.2.0"
+langchain-voyageai = "^0.1.1"
 pypdf = "^4.3.1"
-
+python-dotenv = "^1.0.1"
+certifi = "^2024.8.30"
+pip-system-certs = "^4.0"
 
 [build-system]
 requires = ["poetry-core"]
