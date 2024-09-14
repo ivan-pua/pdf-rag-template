@@ -4,6 +4,7 @@ from langchain_voyageai import VoyageAIEmbeddings
 from dotenv import load_dotenv
 import os
 from langchain_community.vectorstores import FAISS
+from langchain_community.retrievers import KNNRetriever
 
 load_dotenv() # takes variables from .env file
 
@@ -60,3 +61,18 @@ else:
     vectordb = FAISS.from_documents(split_documents, embeddings)
     vectordb.save_local(vector_store_folder_path)
 
+# 5. Retriever
+print("\n5. Creating a retriever... ")
+# by default uses cosine similarity
+retriever = vectordb.as_retriever(search_kwargs={"k": 3})
+
+query = "How are companies using LLMs?"
+print(f"Question: {query}\n")
+
+# retrieve the most relevant documents
+result = retriever.invoke(query)
+
+print("Relevant Documents: ")
+for r in result:
+    retrieved_doc = r.page_content  # return the top1 retrieved result
+    print(retrieved_doc, "\n")
