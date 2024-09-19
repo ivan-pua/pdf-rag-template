@@ -20,12 +20,10 @@ print(documents[0].page_content[0:100])
 print(documents[0].metadata)
 
 # 2. Split document into chunks - for precise matching and fitting context window
-# text_splitter = Recus
+print("\n2. Chunking documents... ")
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 split_documents = text_splitter.split_documents(documents=documents)
-
-print("\n2. Chunking documents... ")
 print(len(split_documents))
 print(split_documents[0])
 
