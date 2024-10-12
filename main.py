@@ -7,10 +7,11 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.retrievers import KNNRetriever
 from transformers import AutoTokenizer, pipeline, AutoModelForQuestionAnswering
 
-load_dotenv() # takes variables from .env file
+load_dotenv()  # takes variables from .env file
 
-# 1. Loaded PDF
+
 def generate_response(query, uploaded_files):
+    # 1. Loaded PDF
     print("1. Loading PDF files...")
     # file_path = "files/databricks-llm.pdf"
     loader = PyPDFLoader(f"files/{uploaded_files.name}")
@@ -24,7 +25,8 @@ def generate_response(query, uploaded_files):
     # 2. Split document into chunks - for precise matching and fitting context window
     print("\n2. Chunking documents... ")
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000, chunk_overlap=200)
     split_documents = text_splitter.split_documents(documents=documents)
     print(len(split_documents))
     print(split_documents[0])
@@ -39,7 +41,7 @@ def generate_response(query, uploaded_files):
 
     # 4. Save embeddings in vector store
     vector_store_folder_path = "faiss_index"
-    if  os.path.isdir(vector_store_folder_path):
+    if os.path.isdir(vector_store_folder_path):
 
         print("\n4. Loading existing vector store... ")
         vectordb = FAISS.load_local(
@@ -82,17 +84,18 @@ def generate_response(query, uploaded_files):
 
     # Define a question-answering pipeline using the model and tokenizer
     question_answerer = pipeline(
-        task="question-answering", 
-        model=model, 
+        task="question-answering",
+        model=model,
         tokenizer=tokenizer,
         temperature=0.5,
-        max_new_tokens=256,  
+        max_new_tokens=256,
         repetition_penalty=1.5,
         do_sample=True,
         device=0
     )
 
     result = question_answerer(question=query, context=context)
-    print(f"\nAnswer: '{result['answer']}', score: {round(result['score'], 4)}, start: {result['start']}, end: {result['end']}")
+    print(
+        f"\nAnswer: '{result['answer']}', score: {round(result['score'], 4)}, start: {result['start']}, end: {result['end']}")
 
     return result['answer']
