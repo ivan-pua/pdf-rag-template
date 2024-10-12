@@ -5,13 +5,7 @@ from dotenv import load_dotenv
 import os
 from langchain_community.vectorstores import FAISS
 from langchain_community.retrievers import KNNRetriever
-from transformers import AutoTokenizer, pipeline, AutoModelForCausalLM, BitsAndBytesConfig
-from langchain_huggingface import HuggingFacePipeline
-from langchain_core.prompts import PromptTemplate
-from time import time
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
-
+from transformers import AutoTokenizer, pipeline, AutoModelForQuestionAnswering
 
 load_dotenv() # takes variables from .env file
 
@@ -75,69 +69,36 @@ query = "How are companies using LLMs?"
 print(f"Question: {query}\n")
 
 # retrieve the most relevant documents
-result = retriever.invoke(query)
+docs = retriever.invoke(query)
 
-print("Relevant Documents: ")
-for r in result:
-    retrieved_doc = r.page_content  # return the top1 retrieved result
-    print(retrieved_doc, "\n")
+context = '\n\n'.join([doc.page_content for doc in docs])
+print(context)
 
 # 6. Set up LLM
 # Specify the model name you want to use
-model_name = "facebook/opt-125m"
+model_name = "deepset/tinyroberta-squad2"
 
 # # Download a tokenizer object by loading the pretrained "Intel/dynamic_tinybert" tokenizer.
 # tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # # Download a question-answering model object by loading the pretrained "Intel/dynamic_tinybert" model.
-model = AutoModelForCausalLM.from_pretrained(model_name)
+model = AutoModelForQuestionAnswering.from_pretrained(model_name)
 
 # Load the tokenizer associated with the specified model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-
-
 # Define a question-answering pipeline using the model and tokenizer
 question_answerer = pipeline(
-    task="text-generation", 
+    task="question-answering", 
     model=model, 
     tokenizer=tokenizer,
-    temperature=0.1,
+    temperature=0.5,
     max_new_tokens=256,  
-    repetition_penalty=1.9,
+    repetition_penalty=1.5,
     do_sample=True,
     device=0
 )
-# Create an instance of the HuggingFacePipeline, which wraps the question-answering pipeline
-# with additional model-specific arguments (temperature and max_length)
-llm = HuggingFacePipeline(
-    pipeline=question_answerer,
-)
 
-prompt_template = """
-<|system|>
-Answer the question based on the context below. Use the following context to help:
+result = question_answerer(question=query, context=context)
+print(f"\nAnswer: '{result['answer']}', score: {round(result['score'], 4)}, start: {result['start']}, end: {result['end']}")
 
-{context}
-
-Question:
-{question}
-
-Answer:
-
-"""
-prompt = PromptTemplate(
-    input_variables=["context", "question"],
-    template=prompt_template,
-)
-
-llm_chain = prompt | llm | StrOutputParser()
-
-rag_chain = {"context": retriever, "question": RunnablePassthrough()} | llm_chain
-
-start_time = time()
-
-print(rag_chain.invoke(query))
-end_time = time()
-
-print(f"Time taken: {end_time -start_time:.2f} seconds.")
