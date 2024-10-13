@@ -18,6 +18,7 @@ nomkl = "^0.0.3"
 langchain-huggingface = "^0.0.1"
 huggingface-hub = {extras = ["cli"], version = "^0.25.2"}
 streamlit = "^1.39.0"
+langchain-openai = "^0.1.0"
 
 [build-system]
 requires = ["poetry-core"]
